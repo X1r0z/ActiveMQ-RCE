@@ -4,7 +4,7 @@
        xsi:schemaLocation="
      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
         <bean id="pb" class="java.lang.ProcessBuilder" init-method="start">
-            <constructor-arg>
+            <constructor-arg >
             <list>
                 <value>open</value>
                 <value>-a</value>
