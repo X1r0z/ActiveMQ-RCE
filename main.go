@@ -49,7 +49,6 @@ func main() {
 	fmt.Println("[*] XML URL:", url)
 
 	if ip != "" {
-		fmt.Println()
 		fmt.Println("[*] Sending packet:", payload)
         wg.Add(1)
 		scan(useTLS, ip, port, data,&wg)
@@ -66,7 +65,6 @@ func main() {
 
 
 		scanner := bufio.NewScanner(targets)
-		fmt.Println()
 		fmt.Println("[*] Sending packet:", payload)
 		for scanner.Scan() {
 			target := scanner.Text()
