@@ -6,12 +6,9 @@
         <bean id="pb" class="java.lang.ProcessBuilder" init-method="start">
             <constructor-arg >
             <list>
-                <value>open</value>
-                <value>-a</value>
-                <value>calculator</value>
-                <!-- <value>bash</value>
+                <value>bash</value>
                 <value>-c</value>
-                <value>touch /tmp/success</value> -->
+                <value>touch /tmp/111</value>
             </list>
             </constructor-arg>
         </bean>
